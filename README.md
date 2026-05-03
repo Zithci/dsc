@@ -1,66 +1,70 @@
-## Foundry
+# Decentralised Stablecoin (DSC)
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+A decentralised, algorithmic stablecoin pegged to USD, backed by exogenous collateral (WETH, WBTC). Built with Foundry as part of Patrick Collins' Foundry course.
 
-Foundry consists of:
+## Overview
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+DSC is an overcollateralised stablecoin — users must deposit at least 200% collateral value to mint DSC. If a position drops below 200% collateralisation, it becomes eligible for liquidation.
 
-## Documentation
+**Contracts:**
+- `DecentralisedStableCoin.sol` — ERC20 stablecoin token, owned and controlled by DSCEngine
+- `DSCEngine.sol` — Core protocol logic: deposit, mint, redeem, burn, liquidate
 
-https://book.getfoundry.sh/
+**Key mechanics:**
+- Liquidation threshold: 50% (must maintain 200% collateral ratio)
+- Liquidation bonus: 10% incentive for liquidators
+- Price feeds: Chainlink oracles with 3-hour staleness check
+
+## Getting Started
+
+### Prerequisites
+
+- [Foundry](https://book.getfoundry.sh/getting-started/installation)
+
+### Setup
+
+```bash
+git clone https://github.com/Zithci/dsc.git
+cd dsc
+forge install
+```
+
+### Environment
+
+Create a `.env` file:
+
+```
+SEPOLIA_RPC_URL=your_rpc_url
+PRIVATE_KEY=your_private_key
+ETHERSCAN_API_KEY=your_api_key
+```
 
 ## Usage
 
-### Build
+```bash
+# Build
+forge build
 
-```shell
-$ forge build
+# Test
+forge test
+
+# Test with gas report
+forge test --gas-report
+
+# Format
+forge fmt
+
+# Deploy to Sepolia
+forge script script/DeplyoyDSC.s.sol --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast
 ```
 
-### Test
+## Test Coverage
 
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+14 unit tests covering:
+- Deployment
+- Collateral deposit / revert cases
+- DSC minting / revert cases
+- Health factor enforcement
+- Collateral redemption
+- DSC burning
+- Liquidation (happy path + revert cases)
